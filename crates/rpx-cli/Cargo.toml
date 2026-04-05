@@ -1,0 +1,26 @@
+[package]
+name = "rpx-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CLI for rpx — deploy ML models to serverless GPUs"
+
+[[bin]]
+name = "rpx"
+path = "src/main.rs"
+
+[dependencies]
+rpx-core = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+charmed-lipgloss = { path = "../../../charmed_rust/crates/lipgloss" }
+charmed-bubbles = { path = "../../../charmed_rust/crates/bubbles" }
+charmed-bubbletea = { path = "../../../charmed_rust/crates/bubbletea" }
+dirs-next = "2"
+chrono = { workspace = true }
+reqwest = { workspace = true }
+toml = { workspace = true }

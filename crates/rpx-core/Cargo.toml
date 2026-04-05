@@ -1,0 +1,27 @@
+[package]
+name = "rpx-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Provider-agnostic GPU serverless deployment framework"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+reqwest = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+futures = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+axum = "0.8"
+bytes = "1"
+regex-lite = "0.1"
+serde_yaml = "0.9"
+
+[dev-dependencies]
+tempfile = "3"
+wiremock = "0.6"

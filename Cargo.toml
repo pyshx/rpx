@@ -1,0 +1,27 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/rpx-core",
+    "crates/rpx-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/pyshx/rpx"
+
+[workspace.dependencies]
+rpx-core = { path = "crates/rpx-core" }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+thiserror = "2"
+async-trait = "0.1"
+futures = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
