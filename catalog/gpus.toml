@@ -1,0 +1,83 @@
+[[gpu]]
+id = "rtx-4000-ada"
+name = "NVIDIA RTX 4000 Ada"
+vram_gb = 20
+architecture = "ada-lovelace"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA RTX 4000 Ada Generation"
+  price_per_sec = 0.000110
+  regions = ["us-east", "us-west", "eu-west"]
+
+[[gpu]]
+id = "l4"
+name = "NVIDIA L4"
+vram_gb = 24
+architecture = "ada-lovelace"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA L4"
+  price_per_sec = 0.000188
+  regions = ["us-east", "us-west", "eu-west"]
+
+[[gpu]]
+id = "rtx-a5000"
+name = "NVIDIA RTX A5000"
+vram_gb = 24
+architecture = "ampere"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA RTX A5000"
+  price_per_sec = 0.000170
+  regions = ["us-east", "eu-west"]
+
+[[gpu]]
+id = "l40"
+name = "NVIDIA L40"
+vram_gb = 48
+architecture = "ada-lovelace"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA L40"
+  price_per_sec = 0.000350
+  regions = ["us-east", "us-west"]
+
+[[gpu]]
+id = "a100-40gb"
+name = "NVIDIA A100 40GB"
+vram_gb = 40
+architecture = "ampere"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA A100 40GB"
+  price_per_sec = 0.000390
+  regions = ["us-east", "eu-west"]
+
+[[gpu]]
+id = "a100-80gb"
+name = "NVIDIA A100 80GB"
+vram_gb = 80
+architecture = "ampere"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA A100 80GB"
+  price_per_sec = 0.000556
+  regions = ["us-east", "eu-west"]
+
+[[gpu]]
+id = "h100-sxm"
+name = "NVIDIA H100 SXM"
+vram_gb = 80
+architecture = "hopper"
+
+  [[gpu.availability]]
+  provider = "runpod"
+  provider_gpu_id = "NVIDIA H100 SXM"
+  price_per_sec = 0.000833
+  regions = ["us-east"]
