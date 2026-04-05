@@ -46,8 +46,9 @@ pub fn resolve_plan(
             ))
         })?;
 
-    // 3. Estimate VRAM
-    let estimated_vram = backend.estimate_vram_gb(params_b, &config.dtype);
+    // 3. Estimate VRAM (use active params for MoE models)
+    let effective_params = sizing::effective_params_for_vram(&config.model, params_b);
+    let estimated_vram = backend.estimate_vram_gb(effective_params, &config.dtype);
 
     // 4. Select GPU
     let provider_filter = config.resolved_provider().or(Some(provider.kind()));

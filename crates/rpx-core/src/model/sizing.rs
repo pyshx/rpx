@@ -22,6 +22,30 @@ pub fn estimate_params_from_name(model_id: &str) -> Option<f64> {
     num_str.parse::<f64>().ok()
 }
 
+/// For MoE models, extract active parameter count from name.
+/// Matches patterns like "A35B", "A22B", "A3B" (active params indicator).
+/// Returns the active param count for VRAM estimation (MoE models only
+/// load active params into VRAM per forward pass).
+pub fn estimate_active_params_from_name(model_id: &str) -> Option<f64> {
+    let re_pattern = regex_lite::Regex::new(r"(?i)A(\d+\.?\d*)B").ok()?;
+    let captures = re_pattern.captures(model_id)?;
+    let num_str = captures.get(1)?.as_str();
+    num_str.parse::<f64>().ok()
+}
+
+/// Get the effective parameter count for VRAM estimation.
+/// For MoE models (those with active param indicators like A35B),
+/// returns the active params. For dense models, returns total params.
+pub fn effective_params_for_vram(model_id: &str, total_params_b: f64) -> f64 {
+    if let Some(active) = estimate_active_params_from_name(model_id) {
+        // MoE: use active params (+ some overhead for routing/embedding layers)
+        // Typically active params * 1.1 accounts for shared layers
+        active * 1.1
+    } else {
+        total_params_b
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum SizingError {
     #[error("backend unavailable: {0}")]
@@ -53,6 +77,38 @@ mod tests {
         assert_eq!(estimate_params_from_name("Qwen/Qwen2.5-72B-Instruct"), Some(72.0));
         assert_eq!(estimate_params_from_name("Qwen/Qwen2.5-1.5B-Instruct"), Some(1.5));
         assert_eq!(estimate_params_from_name("Qwen/Qwen2.5-0.5B-Instruct"), Some(0.5));
+    }
+
+    #[test]
+    fn estimate_active_params_moe() {
+        assert_eq!(
+            estimate_active_params_from_name("Qwen/Qwen3-Coder-480B-A35B-Instruct"),
+            Some(35.0)
+        );
+        assert_eq!(
+            estimate_active_params_from_name("Qwen/Qwen3-235B-A22B-Instruct"),
+            Some(22.0)
+        );
+        assert_eq!(
+            estimate_active_params_from_name("Qwen/Qwen3-Coder-30B-A3B-Instruct"),
+            Some(3.0)
+        );
+        // Dense models should return None
+        assert_eq!(
+            estimate_active_params_from_name("meta-llama/Llama-3.3-70B-Instruct"),
+            None
+        );
+    }
+
+    #[test]
+    fn effective_params_moe_vs_dense() {
+        // MoE: uses active params * 1.1
+        let eff = effective_params_for_vram("Qwen/Qwen3-Coder-480B-A35B-Instruct", 480.0);
+        assert!((eff - 38.5).abs() < 0.1); // 35 * 1.1
+
+        // Dense: uses total params
+        let eff = effective_params_for_vram("meta-llama/Llama-3.3-70B-Instruct", 70.0);
+        assert!((eff - 70.0).abs() < 0.1);
     }
 
     #[test]
