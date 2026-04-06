@@ -19,12 +19,16 @@ impl Backend for VllmBackend {
         vars.insert("MODEL_NAME".to_string(), model_id.to_string());
         vars.insert("DTYPE".to_string(), config.dtype.clone());
 
-        if let Some(len) = config.max_model_len {
-            vars.insert("MAX_MODEL_LEN".to_string(), len.to_string());
-        }
-        if let Some(util) = config.gpu_memory_utilization {
-            vars.insert("GPU_MEMORY_UTILIZATION".to_string(), util.to_string());
-        }
+        // Set max_model_len: user override or default 8192 to prevent
+        // vLLM from allocating KV cache for the full context window
+        // (which OOMs on smaller GPUs)
+        let max_len = config.max_model_len.unwrap_or(8192);
+        vars.insert("MAX_MODEL_LEN".to_string(), max_len.to_string());
+
+        // Set gpu_memory_utilization: user override or default 0.85
+        // (vLLM default 0.95 leaves too little for CUDA graphs)
+        let util = config.gpu_memory_utilization.unwrap_or(0.85);
+        vars.insert("GPU_MEMORY_UTILIZATION".to_string(), util.to_string());
         if let Some(tp) = config.tensor_parallel_size {
             vars.insert("TENSOR_PARALLEL_SIZE".to_string(), tp.to_string());
         }
