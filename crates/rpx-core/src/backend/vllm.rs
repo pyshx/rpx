@@ -11,7 +11,7 @@ impl Backend for VllmBackend {
     }
 
     fn default_image(&self) -> &str {
-        "runpod/worker-v1-vllm:stable-cuda12.1.0"
+        "runpod/worker-v1-vllm:v2.11.3"
     }
 
     fn env_vars(&self, model_id: &str, config: &ModelConfig) -> HashMap<String, String> {
