@@ -214,13 +214,18 @@ impl FleetConfig {
         Ok(())
     }
 
-    /// Build a map of display_name → index for fast alias lookup.
+    /// Build a map of name → index for model lookup.
+    /// Accepts both alias and full model ID for flexibility.
     pub fn alias_map(&self) -> HashMap<String, usize> {
-        self.models
-            .iter()
-            .enumerate()
-            .map(|(i, m)| (m.display_name(), i))
-            .collect()
+        let mut map = HashMap::new();
+        for (i, m) in self.models.iter().enumerate() {
+            map.insert(m.display_name(), i);
+            // Also register the full model ID so clients can use either
+            if m.alias.is_some() {
+                map.entry(m.id.clone()).or_insert(i);
+            }
+        }
+        map
     }
 }
 
