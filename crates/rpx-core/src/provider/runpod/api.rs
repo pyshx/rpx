@@ -55,7 +55,7 @@ async fn create_template(
         name: format!("rpx-{name}-{}", &uuid::Uuid::new_v4().to_string()[..8]),
         image_name: image.to_string(),
         is_serverless: true,
-        container_disk_in_gb: 50,
+        container_disk_in_gb: 100,
         env: if env_vars.is_empty() {
             None
         } else {
