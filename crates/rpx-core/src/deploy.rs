@@ -72,17 +72,33 @@ pub fn resolve_plan(
     };
 
     // 5. Resolve image
+    // default_image() may include a tag (e.g., "repo:tag"). Split it so
+    // we don't create invalid double-tag references like "repo:tag:latest".
+    let (default_repo, default_tag) = {
+        let img = backend.default_image();
+        if let Some((repo, tag)) = img.rsplit_once(':') {
+            // Check it's a tag not a port (e.g., ghcr.io:443)
+            if !tag.contains('/') {
+                (repo.to_string(), tag.to_string())
+            } else {
+                (img.to_string(), "latest".to_string())
+            }
+        } else {
+            (img.to_string(), "latest".to_string())
+        }
+    };
+
     let image = if provider.supports_native_template(&backend_kind) {
         provider
             .native_template(&backend_kind)
             .unwrap_or_else(|| ImageSpec::PrebuiltImage {
-                registry_url: backend.default_image().to_string(),
-                tag: "latest".to_string(),
+                registry_url: default_repo.clone(),
+                tag: default_tag.clone(),
             })
     } else {
         ImageSpec::PrebuiltImage {
-            registry_url: backend.default_image().to_string(),
-            tag: "latest".to_string(),
+            registry_url: default_repo,
+            tag: default_tag,
         }
     };
 
