@@ -1,0 +1,23 @@
+gateway:
+  port: 8080
+  host: 0.0.0.0
+
+provider:
+  name: runpod
+
+models:
+  - id: Qwen/Qwen2.5-Coder-7B-Instruct
+    alias: qwen-coder-7b
+    tier: warm
+    backend: rvllm
+    gpu: a100-80gb
+    scaling:
+      min_workers: 0
+      max_workers: 1
+      idle_timeout: 300
+
+api_keys:
+  - key: sk-fugu-rpx
+    name: fugu
+    rate_limit_rpm: 120
+    budget_usd: 100.0
