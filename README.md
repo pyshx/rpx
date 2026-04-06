@@ -175,7 +175,7 @@ The `Provider` trait is designed for extension. Adding a new provider means impl
 | Backend | Status | Image |
 |---------|--------|-------|
 | vLLM | Supported (default) | `runpod/worker-v1-vllm:*` |
-| rvLLM | Supported | `pyshx/rvllm-runpod:latest` |
+| rvLLM | Supported | [`pyshx/rvllm-runpod`](https://github.com/pyshx/rvllm-runpod) — wraps [rvllm](https://github.com/pyshx/rvllm) (Rust vLLM fork, 50MB image) |
 | TGI | Planned | — |
 | llama.cpp | Planned | — |
 
