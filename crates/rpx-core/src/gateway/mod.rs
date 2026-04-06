@@ -73,7 +73,7 @@ impl GatewayServer {
             .map(|m| {
                 (
                     m.display_name(),
-                    Arc::new(RequestQueue::new(50, Duration::from_secs(120))),
+                    Arc::new(RequestQueue::new(50, Duration::from_secs(300))),
                 )
             })
             .collect();
