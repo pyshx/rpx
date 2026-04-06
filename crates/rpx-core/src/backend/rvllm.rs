@@ -11,7 +11,7 @@ impl Backend for RvllmBackend {
     }
 
     fn default_image(&self) -> &str {
-        "pyshx/rvllm-runpod:latest"
+        "ghcr.io/pyshx/rvllm-runpod:latest"
     }
 
     fn env_vars(&self, model_id: &str, config: &ModelConfig) -> HashMap<String, String> {
