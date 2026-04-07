@@ -121,8 +121,10 @@ impl Orchestrator {
                     // Match endpoint name to model config
                     for entry in &config.models {
                         let model_name = entry.display_name();
+                        let sanitized_id = entry.id.replace(['/', '.', '_'], "-").to_lowercase();
                         let matches = endpoint.name.contains(&model_name)
-                            || endpoint.name.contains(&entry.id.replace('/', "-").to_lowercase());
+                            || endpoint.name.contains(&sanitized_id)
+                            || sanitized_id.contains(&endpoint.name);
 
                         if matches && fleet_state.get(&model_name).is_some_and(|s| s.is_cold()) {
                             let _ = fleet_state.begin_deploy(&model_name);
