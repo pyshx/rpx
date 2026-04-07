@@ -1,61 +1,21 @@
-#[cfg(feature = "tui")]
-use lipgloss::{Border, Style};
-
-// Brand colors
-#[cfg(feature = "tui")]
-const ACCENT: &str = "#7C3AED";
-#[cfg(feature = "tui")]
-const SUCCESS: &str = "#22C55E";
-#[cfg(feature = "tui")]
-const ERROR_COLOR: &str = "#EF4444";
-#[cfg(feature = "tui")]
-const DIM: &str = "#6B7280";
-#[cfg(feature = "tui")]
-const LABEL: &str = "#A78BFA";
-
-#[cfg(feature = "tui")]
 pub fn title(text: &str) -> String {
-    Style::new().bold().foreground(ACCENT).render(text)
-}
-#[cfg(not(feature = "tui"))]
-pub fn title(text: &str) -> String {
-    text.to_string()
+    format!("\x1b[1;35m{text}\x1b[0m")
 }
 
-#[cfg(feature = "tui")]
 pub fn success(text: &str) -> String {
-    Style::new().bold().foreground(SUCCESS).render(text)
-}
-#[cfg(not(feature = "tui"))]
-pub fn success(text: &str) -> String {
-    text.to_string()
+    format!("\x1b[1;32m{text}\x1b[0m")
 }
 
-#[cfg(feature = "tui")]
 pub fn error(text: &str) -> String {
-    Style::new().bold().foreground(ERROR_COLOR).render(text)
-}
-#[cfg(not(feature = "tui"))]
-pub fn error(text: &str) -> String {
-    text.to_string()
+    format!("\x1b[1;31m{text}\x1b[0m")
 }
 
-#[cfg(feature = "tui")]
 pub fn dim(text: &str) -> String {
-    Style::new().foreground(DIM).render(text)
-}
-#[cfg(not(feature = "tui"))]
-pub fn dim(text: &str) -> String {
-    text.to_string()
+    format!("\x1b[2m{text}\x1b[0m")
 }
 
-#[cfg(feature = "tui")]
 pub fn label(text: &str) -> String {
-    Style::new().foreground(LABEL).render(text)
-}
-#[cfg(not(feature = "tui"))]
-pub fn label(text: &str) -> String {
-    text.to_string()
+    format!("\x1b[35m{text}\x1b[0m")
 }
 
 pub fn key_value(key: &str, value: &str) -> String {
@@ -73,38 +33,18 @@ pub struct EndpointCardInfo<'a> {
     pub cost_per_hour: f64,
 }
 
-#[cfg(feature = "tui")]
 pub fn endpoint_card(info: &EndpointCardInfo<'_>) -> String {
-    let EndpointCardInfo { name, id, provider, gpu, backend, status, vram, cost_per_hour } = info;
-    let border_style = Style::new()
-        .border(Border::rounded())
-        .border_foreground(ACCENT)
-        .padding((1, 2));
-
-    let content = [
-        title(name),
-        String::new(),
-        key_value("ID", id),
-        key_value("Provider", provider),
-        key_value("GPU", gpu),
-        key_value("Backend", backend),
-        key_value("Status", status),
-        key_value("VRAM", &format!("{vram:.1} GB")),
-        key_value("Cost", &format!("${cost_per_hour:.2}/hr")),
-        String::new(),
-        dim("  rpx proxy ") + name,
+    [
+        title(info.name),
+        key_value("ID", info.id),
+        key_value("Provider", info.provider),
+        key_value("GPU", info.gpu),
+        key_value("Backend", info.backend),
+        key_value("Status", info.status),
+        key_value("VRAM", &format!("{:.1} GB", info.vram)),
+        key_value("Cost", &format!("${:.2}/hr", info.cost_per_hour)),
     ]
-    .join("\n");
-
-    border_style.render(&content)
-}
-
-#[cfg(not(feature = "tui"))]
-pub fn endpoint_card(info: &EndpointCardInfo<'_>) -> String {
-    format!(
-        "{} ({}) — {} on {} via {}",
-        info.name, info.id, info.status, info.gpu, info.provider
-    )
+    .join("\n")
 }
 
 pub fn table_header(columns: &[(&str, usize)]) -> String {

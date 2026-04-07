@@ -17,12 +17,7 @@ serde_json = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 clap = { version = "4", features = ["derive"] }
-charmed-lipgloss = { path = "../../../charmed_rust/crates/lipgloss", optional = true }
 dirs-next = "2"
 chrono = { workspace = true }
 reqwest = { workspace = true }
 toml = { workspace = true }
-
-[features]
-default = ["tui"]
-tui = ["dep:charmed-lipgloss"]
