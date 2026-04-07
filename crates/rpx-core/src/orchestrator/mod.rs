@@ -74,14 +74,15 @@ impl Orchestrator {
             config.models.iter().map(|m| m.display_name()).collect();
         let mut fleet_state = FleetState::init_from_config(&model_names);
 
-        // Reconcile with persisted state and actual RunPod endpoints
+        // Reconcile: try persisted state first, then discover from provider
         let persisted = store.load().unwrap_or_default();
+        let mut restored_count = 0;
+
+        // Phase 1: Restore from persisted state file (if it exists)
         for (model_name, persisted_model) in &persisted.models {
             if let Some(endpoint_id) = &persisted_model.endpoint_id {
-                // Check if endpoint still exists on RunPod
                 match provider.get_endpoint(endpoint_id).await {
                     Ok(endpoint) => {
-                        // Endpoint exists — restore as Warm or Hot based on config
                         let tier = config
                             .models
                             .iter()
@@ -89,10 +90,10 @@ impl Orchestrator {
                             .map(|m| m.tier)
                             .unwrap_or(crate::fleet::ModelTier::Warm);
 
-                        // Fake a deploy cycle to get into Warm/Hot state
                         if fleet_state.get(model_name).is_some_and(|s| s.is_cold()) {
                             let _ = fleet_state.begin_deploy(model_name);
                             let _ = fleet_state.deploy_succeeded(model_name, endpoint, tier);
+                            restored_count += 1;
                             tracing::info!(
                                 model = %model_name,
                                 endpoint = %endpoint_id,
@@ -104,8 +105,40 @@ impl Orchestrator {
                         tracing::warn!(
                             model = %model_name,
                             endpoint = %endpoint_id,
-                            "persisted endpoint no longer exists on RunPod — starting cold"
+                            "persisted endpoint no longer exists — starting cold"
                         );
+                    }
+                }
+            }
+        }
+
+        // Phase 2: Discover existing endpoints from provider (for Cloud Run / fresh starts)
+        // Match by endpoint name against config model aliases
+        if restored_count == 0 {
+            tracing::info!("no persisted state — discovering existing endpoints from provider");
+            if let Ok(live_endpoints) = provider.list_endpoints().await {
+                for endpoint in live_endpoints {
+                    // Match endpoint name to model config
+                    for entry in &config.models {
+                        let model_name = entry.display_name();
+                        let matches = endpoint.name.contains(&model_name)
+                            || endpoint.name.contains(&entry.id.replace('/', "-").to_lowercase());
+
+                        if matches && fleet_state.get(&model_name).is_some_and(|s| s.is_cold()) {
+                            let _ = fleet_state.begin_deploy(&model_name);
+                            let _ = fleet_state.deploy_succeeded(
+                                &model_name,
+                                endpoint.clone(),
+                                entry.tier,
+                            );
+                            tracing::info!(
+                                model = %model_name,
+                                endpoint_id = %endpoint.id,
+                                endpoint_name = %endpoint.name,
+                                "discovered existing endpoint from provider"
+                            );
+                            break;
+                        }
                     }
                 }
             }
