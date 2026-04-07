@@ -9,7 +9,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY crates/ crates/
 COPY catalog/ catalog/
 
-RUN cargo build --release --bin rpx
+RUN cargo build --release --bin rpx --no-default-features
 
 # Runtime stage
 FROM debian:bookworm-slim
