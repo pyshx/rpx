@@ -1,8 +1,10 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use tokio::sync::RwLock;
 
 use crate::catalog::GpuCatalog;
+use crate::fleet::store::FleetStore;
 use crate::deploy;
 use crate::fleet::ModelEntry;
 use crate::fleet::state::FleetState;
@@ -14,14 +16,16 @@ pub struct ModelManager {
     provider: Arc<dyn Provider>,
     catalog: GpuCatalog,
     http_client: reqwest::Client,
+    store_path: PathBuf,
 }
 
 impl ModelManager {
-    pub fn new(provider: Arc<dyn Provider>, catalog: GpuCatalog) -> Self {
+    pub fn new(provider: Arc<dyn Provider>, catalog: GpuCatalog, store_path: PathBuf) -> Self {
         Self {
             provider,
             catalog,
             http_client: reqwest::Client::new(),
+            store_path,
         }
     }
 
@@ -48,7 +52,12 @@ impl ModelManager {
                 let mut s = state.write().await;
                 s.deploy_succeeded(&model_name, endpoint, entry.tier)
                     .map_err(|e| DeployError::State(e.to_string()))?;
-                tracing::info!(model = %model_name, tier = %entry.tier, "model deployed");
+                // Persist immediately so endpoint_id survives restarts
+                let store = FleetStore::new(self.store_path.clone());
+                if let Err(e) = store.save(&s.to_persisted()) {
+                    tracing::warn!(error = %e, "failed to persist state after deploy");
+                }
+                tracing::info!(model = %model_name, tier = %entry.tier, "model deployed and persisted");
                 Ok(())
             }
             Err(e) => {
@@ -187,6 +196,6 @@ mod tests {
     fn model_manager_creates_with_catalog() {
         let provider = Arc::new(RunPodProvider::new("test".to_string()));
         let catalog = GpuCatalog::load_embedded().unwrap();
-        let _manager = ModelManager::new(provider, catalog);
+        let _manager = ModelManager::new(provider, catalog, PathBuf::from("/tmp/test_state.json"));
     }
 }

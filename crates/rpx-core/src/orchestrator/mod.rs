@@ -112,7 +112,11 @@ impl Orchestrator {
         }
 
         let state = Arc::new(RwLock::new(fleet_state));
-        let model_manager = Arc::new(ModelManager::new(provider.clone(), catalog));
+        let model_manager = Arc::new(ModelManager::new(
+            provider.clone(),
+            catalog,
+            store.path().to_path_buf(),
+        ));
 
         Ok(Self {
             config,
