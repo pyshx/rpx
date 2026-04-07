@@ -122,9 +122,11 @@ impl Orchestrator {
                     for entry in &config.models {
                         let model_name = entry.display_name();
                         let sanitized_id = entry.id.replace(['/', '.', '_'], "-").to_lowercase();
-                        let matches = endpoint.name.contains(&model_name)
-                            || endpoint.name.contains(&sanitized_id)
-                            || sanitized_id.contains(&endpoint.name);
+                        let ep_name = endpoint.name.to_lowercase();
+                        let matches = ep_name.contains(&model_name)
+                            || ep_name.contains(&sanitized_id)
+                            || sanitized_id.contains(&ep_name)
+                            || (ep_name.contains("rpx") && ep_name.contains(&entry.backend));
 
                         if matches && fleet_state.get(&model_name).is_some_and(|s| s.is_cold()) {
                             let _ = fleet_state.begin_deploy(&model_name);

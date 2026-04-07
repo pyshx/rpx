@@ -8,11 +8,11 @@ provider:
 models:
   - id: Qwen/Qwen2.5-Coder-7B-Instruct
     alias: qwen-coder-7b
-    tier: warm
+    tier: hot
     backend: rvllm
     gpu: a100-80gb
     scaling:
-      min_workers: 0
+      min_workers: 1
       max_workers: 1
       idle_timeout: 300
 
